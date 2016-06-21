@@ -1,5 +1,15 @@
 # ow
+
 Utility for running Go language Actions on OpenWhisk, see [this project](https://github.com/jthomas/openwhisk_go_action).
+
+install
+--
+```
+go get github.com/jthomas/ow
+```
+
+usage
+--
 
 ``` go 
 package main
