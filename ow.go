@@ -14,11 +14,11 @@ type ErrResponse struct {
 	Error string `json:"error"`
 }
 
-type callback func(json.RawMessage) (interface{}, error)
+type Callback func(json.RawMessage) (interface{}, error)
 
 var action callback
 
-func RegisterAction(cb callback) {
+func RegisterAction(cb Callback) {
 	action = cb
 	setupHandlers()
 }
