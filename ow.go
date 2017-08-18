@@ -6,14 +6,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"log"
 )
 
 type Params struct {
 	Value        json.RawMessage `json:"value"`
 	ActivationID string          `json:"activation_id"`
 	ActionName   string          `json:"action_name"`
-	Deadline     string          `json:"deadline"` // TODO: should probably be a time value, requires custom unmarshaller
+	Deadline     string          `json:"deadline"`
 	ApiKey       string          `json:"api_key"`
 	Namespace    string          `json:"namespace"`
 }
