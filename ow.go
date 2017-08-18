@@ -3,12 +3,19 @@ package ow
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"io/ioutil"
+	"net/http"
+	"os"
+	"log"
 )
 
 type Params struct {
-	Value json.RawMessage `json:"value"`
+	Value        json.RawMessage `json:"value"`
+	ActivationID string          `json:"activation_id"`
+	ActionName   string          `json:"action_name"`
+	Deadline     string          `json:"deadline"` // TODO: should probably be a time value, requires custom unmarshaller
+	ApiKey       string          `json:"api_key"`
+	Namespace    string          `json:"namespace"`
 }
 
 type ErrResponse struct {
@@ -56,6 +63,12 @@ func runHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Propagate values from params such as api_key into environment variables
+	if err := propagateParamsToEnvironment(params); err != nil {
+		sendError(w, http.StatusInternalServerError, fmt.Sprintf("Error setting environment for action: %v", err))
+		return
+	}
+
 	response, err := action(params.Value)
 
 	if err != nil {
@@ -88,6 +101,41 @@ func runHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func propagateParamsToEnvironment(params Params) error {
+
+	if params.ApiKey != "" {
+		if err := os.Setenv("__OW_API_KEY", params.ApiKey); err != nil {
+			return err
+		}
+	}
+
+	if params.Namespace != "" {
+		if err := os.Setenv("__OW_NAMESPACE", params.Namespace); err != nil {
+			return err
+		}
+	}
+
+	if params.ActionName != "" {
+		if err := os.Setenv("__OW_ACTION_NAME", params.ActionName); err != nil {
+			return err
+		}
+	}
+
+	if params.ActivationID != "" {
+		if err := os.Setenv("__OW_ACTIVATION_ID", params.ActivationID); err != nil {
+			return err
+		}
+	}
+
+	if params.Deadline != "" {
+		if err := os.Setenv("__OW_DEADLINE", params.Deadline); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func setupHandlers() {
